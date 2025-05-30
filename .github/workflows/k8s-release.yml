@@ -41,7 +41,7 @@ jobs:
         run: |
           git checkout --orphan $TARGET_BRANCH
           git rm -rf .
-          mkdir ${{ inputs.k8s-directory }}
+          rm -rf ${{ inputs.k8s-directory }} && mkdir ${{ inputs.k8s-directory }}
           cp -r rendered/**/templates/* ${{ inputs.k8s-directory }}
 
       - name: Commit and push rendered files
