@@ -1,0 +1,53 @@
+name: k8s release github workflow
+
+on:
+  workflow_call:
+    inputs:
+      working-directory:
+        required: false
+        type: string
+        default: './'
+      env:
+        required: true
+        type: string
+        description: dev/stg/prd
+
+jobs:
+  render-and-push:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ${{ github.workspace }}/${{ inputs.working-directory }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Helm
+        uses: azure/setup-helm@v4
+        with:
+          version: v3.14.0
+
+      - name: Render helm template
+        run: |
+          helm template . -f values-${{ inputs.env }}.yml \
+            --set buildNumber=${{ github.run_number }} \
+            --output-dir rendered
+
+      - name: Set up Git
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          
+      - name: Prepare rendered files for commit
+        run: |
+          TARGET_BRANCH=${{ inputs.environment }}
+          git fetch origin $TARGET_BRANCH || true
+          git checkout -B $TARGET_BRANCH origin/$TARGET_BRANCH || git checkout -b $TARGET_BRANCH
+
+          mkdir -p k8s
+          cp rendered/**/templates/* k8s/
+
+      - name: Commit and push rendered files
+        run: |
+          git add k8s/
+          git commit -m "Update rendered YAMLs for ${{ inputs.environment }}" || echo "Nothing to commit"
+          git push origin $TARGET_BRANCH
