@@ -28,7 +28,7 @@ jobs:
 
       - name: Render helm template
         run: |
-          helm template . -f values-${{ inputs.env }}.yml \
+          helm template . -f values-${{ inputs.env }}.yaml \
             --set buildNumber=${{ github.run_number }} \
             --output-dir rendered
 
