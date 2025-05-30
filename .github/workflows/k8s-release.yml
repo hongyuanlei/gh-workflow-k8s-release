@@ -12,6 +12,9 @@ on:
         type: string
         description: dev/stg/prd
 
+permissions:
+  contents: write
+
 jobs:
   render-and-push:
     runs-on: ubuntu-latest
@@ -48,4 +51,5 @@ jobs:
         run: |
           git add ${{ inputs.k8s-directory }}
           git commit -m "Update rendered YAMLs for ${{ inputs.environment }}" || echo "Nothing to commit"
-          git push origin $TARGET_BRANCH
+          git remote set-url origin https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}
+          git push origin $TARGET_BRANCH --force
