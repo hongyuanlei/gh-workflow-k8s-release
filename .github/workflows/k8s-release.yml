@@ -55,16 +55,11 @@ jobs:
           git push origin $TARGET_BRANCH --force
 
       - name: Auto-merge $TARGET_BRANCH into dev
-#        if: github.ref == 'refs/heads/master'
+        if: github.ref == 'refs/heads/master'
         run: |
           echo ${{ github.ref }}
-#          git fetch origin
-#
-#          # Checkout dev
-#          git checkout dev
-#
-#          # Merge the temporary gh.${{ github.run_id }} branch into dev
-#          git merge origin/$TARGET_BRANCH -m "Auto-merge $TARGET_BRANCH into dev [GitHub Actions]"
-#
-#          # Push the updated dev branch
-#          git push origin dev
+          git fetch origin
+          git checkout -B ${{ inputs.environment }}
+          git merge origin/$TARGET_BRANCH -m "Auto-merge $TARGET_BRANCH into ${{ inputs.environment }} [GitHub Actions]"
+          git remote set-url origin https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}
+          git push origin ${{ inputs.environment }} --force
