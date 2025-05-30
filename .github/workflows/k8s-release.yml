@@ -15,6 +15,8 @@ on:
 jobs:
   render-and-push:
     runs-on: ubuntu-latest
+    env:
+      TARGET_BRANCH: gh.${{ github.run_id }}
     defaults:
       run:
         working-directory: ${{ github.workspace }}/${{ inputs.working-directory }}
@@ -39,15 +41,14 @@ jobs:
           
       - name: Prepare rendered files for commit
         run: |
-          TARGET_BRANCH=${{ inputs.environment }}
-          git fetch origin $TARGET_BRANCH || true
-          git checkout -B $TARGET_BRANCH origin/$TARGET_BRANCH || git checkout -b $TARGET_BRANCH
-
-          mkdir -p k8s
-          cp rendered/**/templates/* k8s/
+          cd ${{ github.workspace }}
+          git checkout --orphan $TARGET_BRANCH
+          git rm -rf .
+          cp -r ${{ inputs.working-directory }}/rendered/**/templates/* ${{ inputs.working-directory }}
+          rm -rf ${{ inputs.working-directory }}/rendered
 
       - name: Commit and push rendered files
         run: |
-          git add k8s/
+          git add ${{ inputs.working-directory }}
           git commit -m "Update rendered YAMLs for ${{ inputs.environment }}" || echo "Nothing to commit"
           git push origin $TARGET_BRANCH
