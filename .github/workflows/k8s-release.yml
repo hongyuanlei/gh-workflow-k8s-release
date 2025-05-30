@@ -7,7 +7,7 @@ on:
         required: false
         type: string
         default: './'
-      env:
+      environment:
         required: true
         type: string
         description: dev/stg/prd
@@ -28,7 +28,7 @@ jobs:
 
       - name: Render helm template
         run: |
-          helm template . -f values-${{ inputs.env }}.yaml \
+          helm template . -f values-${{ inputs.environment }}.yaml \
             --set buildNumber=${{ github.run_number }} \
             --output-dir rendered
 
