@@ -27,8 +27,8 @@ jobs:
 
       - name: Render helm template
         run: |
-          cd ${{ inputs.k8s-directory }}
-          helm template . -f values-${{ inputs.environment }}.yaml \
+          helm template ${{ inputs.k8s-directory }} \
+            -f ${{ inputs.k8s-directory }}/values-${{ inputs.environment }}.yaml \
             --set buildNumber=${{ github.run_number }} \
             --output-dir rendered
 
